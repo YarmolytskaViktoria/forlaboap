@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Мій застосунок - варіант №12</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Реєстр програмного забезпечення для лабораторій</h1>
+        </header>
+
+        <main class="flexbox">
+            <section class="createsection">
+                <h2>Додати продукт</h2>
+                <form id="createForm" novalidate>
+                    <div class="field">
+                        <label for="nameInput">Назва продукту</label>
+                        <input id="nameInput" type="text" required minlength="3" />
+                        <p class="error-text" id="nameError"></p>
+                    </div>
+                    
+                    <div class="field">
+                        <label for="licenseSelect">Тип ліцензії</label>
+                        <select id="licenseSelect" required>
+                            <option value="">Оберіть ліцензію</option>
+                            <option value="Free">Free</option>
+                            <option value="Academic">Academic</option>
+                            <option value="Commercial">Commercial</option>
+                        </select>
+                        <p class="error-text" id="licenseError"></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="userInput">Користувач</label>
+                        <input id="userInput" type="email" placeholder="user@gmail.com" required/>
+                        <p class="error-text" id="userError"></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="dateInput">Дата реєстрації</label>
+                        <input id="dateInput" type="date" required />
+                        <p class="error-text" id="dateError"></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="commentInput">Коментар</label>
+                        <textarea id="commentInput" rows="3"></textarea>
+                        <p class="error-text" id="commentError"></p>
+                    </div>
+
+                    <div class="buttons">
+                        <button type="submit">Додати</button>
+                        <button type="button" id="resetBtn">Очистити</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="listsection">
+                <h2>Список продуктів</h2>
+                <table id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Назва</th>
+                            <th>Ліцензія</th>
+                            <th>Користувач</th>
+                            <th>Дата</th>
+                            <th>Коментар</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody">
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>
