@@ -1,52 +1,29 @@
 const repo = require("../repositories/products.repository");
-const { validateCreateProduct } = require("../dtos/products.dto");
 const { v4: uuid } = require("uuid");
+const { CreateProductRequestDto, UpdateProductRequestDto, ProductResponseDto } = require("../dtos/products.dto");
 
 module.exports = {
-  getAll: () => repo.getAll(),
-
+  getAll: () => repo.getAll().map(ProductResponseDto),
+  
   getById: (id) => {
     const item = repo.getById(id);
-    if (!item) throw { status: 404, code: "NOT_FOUND", message: "Product not found" };
-    return item;
+    if (!item) throw { status: 404, code: "NOT_FOUND", message: "Product not found" }; // Вимога 404
+    return ProductResponseDto(item);
   },
 
-  create: (dto) => {
-    const errors = validateCreateProduct(dto);
-
-    if (errors.length) {
-      throw {
-        status: 400,
-        code: "VALIDATION_ERROR",
-        message: "Invalid request body",
-        details: errors
-      };
-    }
-
-    const product = {
-      id: uuid(),
-      name: dto.name,
-      licenseType: dto.licenseType,
-      userEmail: dto.userEmail,
-      createdAt: dto.createdAt,
-      comment: dto.comment || ""
-    };
-
-    return repo.create(product);
+  create: (data) => {
+    const dto = CreateProductRequestDto(data); // Тут же спрацює валідація
+    const product = { id: uuid(), ...dto }; // 5.1. Створення ID на сервері
+    return ProductResponseDto(repo.create(product));
   },
 
-  update: (id, dto) => {
-    if (!repo.getById(id)) {
-      throw { status: 404, code: "NOT_FOUND", message: "Product not found" };
-    }
-
-    const updated = { id, ...dto };
-    return repo.update(id, updated);
+  update: (id, data) => {
+    if (!repo.getById(id)) throw { status: 404, code: "NOT_FOUND", message: "Product not found" };
+    const dto = UpdateProductRequestDto(data);
+    return ProductResponseDto(repo.update(id, { id, ...dto }));
   },
 
   delete: (id) => {
-    if (!repo.delete(id)) {
-      throw { status: 404, code: "NOT_FOUND", message: "Product not found" };
-    }
+    if (!repo.delete(id)) throw { status: 404, code: "NOT_FOUND", message: "Product not found" };
   }
 };
