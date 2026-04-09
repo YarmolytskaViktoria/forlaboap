@@ -5,7 +5,7 @@ import {
   createProductBodySchema, 
   productIdParamsSchema, 
   listProductsQuerySchema 
-} from "../dtos/products.dto";
+} from "../dtos/products.dto.js";
 
 const router = Router();
 
