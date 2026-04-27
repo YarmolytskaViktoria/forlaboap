@@ -1,33 +1,29 @@
-import { Request, Response, NextFunction } from 'express';
-import { usersService } from '../services/users.service.js';
-import { CreateUserDto, UpdateUserDto } from '../dtos/users.dto.js';
-
+import { Request, Response, NextFunction } from "express";
+import { usersService } from "../services/users.service.js";
+import { CreateUserDto, UpdateUserDto, ListUsersQuery, UserIdParams } from "../dtos/users.dto.js";
+ 
 export const usersController = {
-  // GET /api/users
   getAll: (req: Request, res: Response, next: NextFunction) => {
     try {
-      const items = usersService.getAll();
-      res.status(200).json({
-        items,
-        total: items.length,
-      });
+      const query = res.locals.query as ListUsersQuery;
+      const result = usersService.getAll(query);
+      res.json(result);
     } catch (e) {
       next(e);
     }
   },
-
-  // GET /api/users/:id
-  getById: (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+ 
+  getById: (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = usersService.getById(req.params.id);
-      res.status(200).json(user);
+      const { id } = res.locals.params as UserIdParams;
+      const user = usersService.getById(id);
+      res.json(user);
     } catch (e) {
       next(e);
     }
   },
-
-  // POST /api/users
-  create: (req: Request<any, any, CreateUserDto>, res: Response, next: NextFunction) => {
+ 
+  create: (req: Request<{}, {}, CreateUserDto>, res: Response, next: NextFunction) => {
     try {
       const user = usersService.create(req.body);
       res.status(201).json(user);
@@ -35,24 +31,24 @@ export const usersController = {
       next(e);
     }
   },
-
-  // PUT /api/users/:id
-  update: (req: Request<{ id: string }, any, UpdateUserDto>, res: Response, next: NextFunction) => {
+ 
+  update: (req: Request<{}, {}, UpdateUserDto>, res: Response, next: NextFunction) => {
     try {
-      const user = usersService.update(req.params.id, req.body);
-      res.status(200).json(user);
+      const { id } = res.locals.params as UserIdParams;
+      const user = usersService.update(id, req.body);
+      res.json(user);
     } catch (e) {
       next(e);
     }
   },
-
-  // DELETE /api/users/:id
-  delete: (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+ 
+  delete: (req: Request, res: Response, next: NextFunction) => {
     try {
-      usersService.delete(req.params.id);
+      const { id } = res.locals.params as UserIdParams;
+      usersService.delete(id);
       res.status(204).send();
     } catch (e) {
       next(e);
     }
-  }
+  },
 };

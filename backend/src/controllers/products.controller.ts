@@ -1,30 +1,29 @@
-import { Request, Response, NextFunction } from 'express';
-import { productsService } from '../services/products.service.js';
-import { ListProductsQuery, CreateProductDto, UpdateProductDto } from '../dtos/products.dto.js';
-
+import { Request, Response, NextFunction } from "express";
+import { productsService } from "../services/products.service.js";
+import { CreateProductDto, UpdateProductDto, ListProductsQuery, ProductIdParams } from "../dtos/products.dto.js";
+ 
 export const productsController = {
-  // GET /api/products
-  getAll: (req: Request<any, any, any, ListProductsQuery>, res: Response, next: NextFunction) => {
+  getAll: (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = productsService.getAll(req.query);
-      res.json(result); // повертає { items, total }
-    } catch (e) {
-      next(e);
-    }
-  },
-
-  // GET /api/products/:id
-  getById: (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
-    try {
-      const result = productsService.getById(req.params.id);
+      const query = res.locals.query as ListProductsQuery;
+      const result = productsService.getAll(query);
       res.json(result);
     } catch (e) {
       next(e);
     }
   },
-
-  // POST /api/products
-  create: (req: Request<any, any, CreateProductDto>, res: Response, next: NextFunction) => {
+ 
+  getById: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = res.locals.params as ProductIdParams;
+      const result = productsService.getById(id);
+      res.json(result);
+    } catch (e) {
+      next(e);
+    }
+  },
+ 
+  create: (req: Request<{}, {}, CreateProductDto>, res: Response, next: NextFunction) => {
     try {
       const result = productsService.create(req.body);
       res.status(201).json(result);
@@ -32,24 +31,24 @@ export const productsController = {
       next(e);
     }
   },
-
-  // PUT /api/products/:id
-  update: (req: Request<{ id: string }, any, UpdateProductDto>, res: Response, next: NextFunction) => {
+ 
+  update: (req: Request<{}, {}, UpdateProductDto>, res: Response, next: NextFunction) => {
     try {
-      const result = productsService.update(req.params.id, req.body);
+      const { id } = res.locals.params as ProductIdParams;
+      const result = productsService.update(id, req.body);
       res.json(result);
     } catch (e) {
       next(e);
     }
   },
-
-  // DELETE /api/products/:id
-  delete: (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+ 
+  delete: (req: Request, res: Response, next: NextFunction) => {
     try {
-      productsService.delete(req.params.id);
+      const { id } = res.locals.params as ProductIdParams;
+      productsService.delete(id);
       res.status(204).send();
     } catch (e) {
       next(e);
     }
-  }
+  },
 };

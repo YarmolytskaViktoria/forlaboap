@@ -1,25 +1,25 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-
-export const validate = (schemas: { 
-  body?: z.ZodType; 
-  query?: z.ZodType; 
-  params?: z.ZodType 
+ 
+export const validate = (schemas: {
+  body?: z.ZodType;
+  query?: z.ZodType;
+  params?: z.ZodType;
 }) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (schemas.body) {
         req.body = await schemas.body.parseAsync(req.body);
       }
-
+ 
       if (schemas.query) {
-        req.query = await schemas.query.parseAsync(req.query) as any;
+        res.locals.query = await schemas.query.parseAsync(req.query);
       }
-
+ 
       if (schemas.params) {
-        req.params = await schemas.params.parseAsync(req.params) as any;
+        res.locals.params = await schemas.params.parseAsync(req.params);
       }
-
+ 
       next();
     } catch (error) {
       next(error);
