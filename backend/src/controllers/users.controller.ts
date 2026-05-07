@@ -1,54 +1,47 @@
 import { Request, Response, NextFunction } from "express";
 import { usersService } from "../services/users.service.js";
 import { CreateUserDto, UpdateUserDto, ListUsersQuery, UserIdParams } from "../dtos/users.dto.js";
- 
+
 export const usersController = {
-  getAll: (req: Request, res: Response, next: NextFunction) => {
+  getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const query = res.locals.query as ListUsersQuery;
-      const result = usersService.getAll(query);
-      res.json(result);
-    } catch (e) {
-      next(e);
-    }
+      res.json(await usersService.getAll(query));
+    } catch (e) { next(e); }
   },
- 
-  getById: (req: Request, res: Response, next: NextFunction) => {
+
+  getById: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = res.locals.params as UserIdParams;
-      const user = usersService.getById(id);
-      res.json(user);
-    } catch (e) {
-      next(e);
-    }
+      res.json(await usersService.getById(id));
+    } catch (e) { next(e); }
   },
- 
-  create: (req: Request<{}, {}, CreateUserDto>, res: Response, next: NextFunction) => {
+
+  getWithStats: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = usersService.create(req.body);
-      res.status(201).json(user);
-    } catch (e) {
-      next(e);
-    }
+      const result = await usersService.getWithStats();
+      res.json({ data: result });
+    } catch (e) { next(e); }
   },
- 
-  update: (req: Request<{}, {}, UpdateUserDto>, res: Response, next: NextFunction) => {
+
+  create: async (req: Request<{}, {}, CreateUserDto>, res: Response, next: NextFunction) => {
     try {
-      const { id } = res.locals.params as UserIdParams;
-      const user = usersService.update(id, req.body);
-      res.json(user);
-    } catch (e) {
-      next(e);
-    }
+      res.status(201).json(await usersService.create(req.body));
+    } catch (e) { next(e); }
   },
- 
-  delete: (req: Request, res: Response, next: NextFunction) => {
+
+  update: async (req: Request<{}, {}, UpdateUserDto>, res: Response, next: NextFunction) => {
     try {
       const { id } = res.locals.params as UserIdParams;
-      usersService.delete(id);
+      res.json(await usersService.update(id, req.body));
+    } catch (e) { next(e); }
+  },
+
+  delete: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = res.locals.params as UserIdParams;
+      await usersService.delete(id);
       res.status(204).send();
-    } catch (e) {
-      next(e);
-    }
+    } catch (e) { next(e); }
   },
 };

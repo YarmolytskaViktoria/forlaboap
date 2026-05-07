@@ -1,41 +1,69 @@
 import { IUser } from "../types/user.types.js";
 import { ListUsersQuery } from "../dtos/users.dto.js";
- 
-const users: IUser[] = [];
- 
+import { all, get, run } from "../db/dbClient.js";
+
 export const usersRepository = {
-  getAll: (query: ListUsersQuery) => {
-    const start = (query.page - 1) * query.pageSize;
-    const paginated = users.slice(start, start + query.pageSize);
- 
-    return {
-      items: paginated,
-      total: users.length,
-    };
+  getAll: async (query: ListUsersQuery) => {
+    const offset = (query.page - 1) * query.pageSize;
+    const rows = await all<IUser>(`
+      SELECT id, name, email, password, createdAt
+      FROM Users
+      ORDER BY createdAt DESC
+      LIMIT ${query.pageSize} OFFSET ${offset};
+    `);
+    const countRow = await get<{ total: number }>(
+      "SELECT COUNT(*) as total FROM Users;"
+    );
+    return { items: rows, total: countRow?.total ?? 0 };
   },
- 
-  getById: (id: string): IUser | undefined =>
-    users.find((u) => u.id === id),
- 
-  findByEmail: (email: string): IUser | undefined =>
-    users.find((u) => u.email === email),
- 
-  create: (user: IUser): IUser => {
-    users.push(user);
+
+  getById: async (id: string): Promise<IUser | undefined> =>
+    get<IUser>(`SELECT id, name, email, password, createdAt FROM Users WHERE id = '${id}';`),
+
+  findByEmail: async (email: string): Promise<IUser | undefined> =>
+    get<IUser>(`SELECT id, name, email, password, createdAt FROM Users WHERE email = '${email}';`),
+
+  getWithStats: async () => {
+    return await all<{
+      id: string;
+      name: string;
+      email: string;
+      createdAt: string;
+      requestsCount: number;
+    }>(`
+      SELECT
+        u.id,
+        u.name,
+        u.email,
+        u.createdAt,
+        COUNT(r.id) AS requestsCount
+      FROM Users u
+      LEFT JOIN Requests r ON r.userId = u.id
+      GROUP BY u.id
+      ORDER BY requestsCount DESC;
+    `);
+  },
+
+  create: async (user: IUser): Promise<IUser> => {
+    await run(`
+      INSERT INTO Users (id, name, email, password, createdAt)
+      VALUES ('${user.id}', '${user.name}', '${user.email}', '${user.password}', '${user.createdAt}');
+    `);
     return user;
   },
- 
-  update: (id: string, updated: IUser): IUser | null => {
-    const index = users.findIndex((u) => u.id === id);
-    if (index === -1) return null;
-    users[index] = updated;
+
+  update: async (id: string, updated: IUser): Promise<IUser | null> => {
+    const result = await run(`
+      UPDATE Users
+      SET name = '${updated.name}', email = '${updated.email}'
+      WHERE id = '${id}';
+    `);
+    if (result.changes === 0) return null;
     return updated;
   },
- 
-  delete: (id: string): boolean => {
-    const index = users.findIndex((u) => u.id === id);
-    if (index === -1) return false;
-    users.splice(index, 1);
-    return true;
+
+  delete: async (id: string): Promise<boolean> => {
+    const result = await run(`DELETE FROM Users WHERE id = '${id}';`);
+    return result.changes > 0;
   },
 };

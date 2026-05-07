@@ -3,19 +3,18 @@ import { ZodError } from "zod";
 import { AppError } from "../types/errors.js";
  
 /*
-  Єдиний формат помилки для всіх ендпойнтів:
+  Єдиний формат помилки:
   {
     "error": {
       "code": "string",
       "message": "string",
-      "details": [{ "field": "string", "message": "string" }]  // опційно
+      "details": [{ "field": "string", "message": "string" }]  
     }
   }
 */
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   console.error("[ERROR]", err);
  
-  // Zod validation error → 400
   if (err instanceof ZodError) {
     res.status(400).json({
       error: {
@@ -30,7 +29,6 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
  
-  // AppError — наші власні помилки (404, 409, тощо)
   if (err instanceof AppError) {
     res.status(err.status).json({
       error: {
@@ -42,7 +40,6 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
  
-  // Підтримка старого стилю: throw { status, code, message }
   if (err.status && err.code) {
     res.status(err.status).json({
       error: {
@@ -53,7 +50,6 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
  
-  // Непередбачена помилка → 500
   res.status(500).json({
     error: {
       code: "INTERNAL_ERROR",

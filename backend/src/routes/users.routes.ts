@@ -7,37 +7,39 @@ import {
   updateUserBodySchema,
   listUsersQuerySchema,
 } from "../dtos/users.dto.js";
- 
+
 const router = Router();
- 
+
+router.get("/with-stats", usersController.getWithStats);
+
 router.get(
   "/",
   validate({ query: listUsersQuerySchema }),
   usersController.getAll
 );
- 
+
 router.get(
   "/:id",
   validate({ params: userIdParamsSchema }),
   usersController.getById
 );
- 
+
 router.post(
   "/",
   validate({ body: createUserBodySchema }),
   usersController.create
 );
- 
+
 router.put(
   "/:id",
   validate({ params: userIdParamsSchema, body: updateUserBodySchema }),
   usersController.update
 );
- 
+
 router.delete(
   "/:id",
   validate({ params: userIdParamsSchema }),
   usersController.delete
 );
- 
+
 export default router;
