@@ -18,7 +18,7 @@ export const productIdParamsSchema = z.object({
  
 export const listProductsQuerySchema = z.object({
   licenseType: z.enum(["Free", "Academic", "Commercial"]).optional(),
-  sortBy: z.enum(["name", "createdAt"]).optional(),
+  sortBy: z.enum(["name", "createdAt", "licenseType"]).optional(),
   sortDir: z.enum(["asc", "desc"]).default("asc"),
   page: z.coerce.number().min(1).default(1),
   pageSize: z.coerce.number().min(1).max(50).default(10),
@@ -35,6 +35,7 @@ export interface ProductViewDto {
   licenseType: string;
   userEmail: string;
   createdAt: string;
+  comment?: string;
 }
  
 export type { ListResponse };

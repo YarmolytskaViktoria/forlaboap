@@ -1,37 +1,52 @@
 import express, { Application } from "express";
+import cors from "cors";
 import usersRoutes from "./routes/users.routes.js";
 import productsRoutes from "./routes/products.routes.js";
 import requestsRoutes from "./routes/requests.routes.js";
 import { requestLogger } from "./middleware/request-logging.middleware.js";
 import { errorHandler } from "./middleware/error-handler.middleware.js";
-import { migrate } from "./db/migrate.js";  // 3 лаба
+import { migrate } from "./db/migrate.js";
 
 const app: Application = express();
 const PORT = 3000;
 
-app.use(express.json());
+const allowedOrigins = [
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
 
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error("CORS: origin is not allowed"), false);
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+app.options("/{*path}", cors());
+app.use(express.json());
 app.use(requestLogger);
 
-// Підключення маршрутів
-app.use("/api/users", usersRoutes);
-app.use("/api/products", productsRoutes);
-app.use("/api/requests", requestsRoutes);
+app.use("/api/v1/users", usersRoutes);
+app.use("/api/v1/products", productsRoutes);
+app.use("/api/v1/requests", requestsRoutes);
 
-// Глобальний обробник помилок 
 app.use(errorHandler);
 
-async function bootstrap() {  // 3 лаба
-  await migrate();            // 3 лаба
+async function bootstrap() {
+  await migrate();
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-    console.log(`Products API: http://localhost:${PORT}/api/products`);
-    console.log(`Users API: http://localhost:${PORT}/api/users`);
-    console.log(`Requests API: http://localhost:${PORT}/api/requests`);
+    console.log(`Products API: http://localhost:${PORT}/api/v1/products`);
+    console.log(`Users API: http://localhost:${PORT}/api/v1/users`);
+    console.log(`Requests API: http://localhost:${PORT}/api/v1/requests`);
   });
 }
 
-// 3 лаба
 bootstrap().catch((err) => {
   console.error("Fatal startup error:", err);
   process.exit(1);

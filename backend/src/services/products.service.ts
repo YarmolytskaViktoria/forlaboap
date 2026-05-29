@@ -15,6 +15,7 @@ const toView = (item: IProduct): ProductViewDto => ({
   licenseType: item.licenseType,
   userEmail: item.userEmail,
   createdAt: item.createdAt,
+  comment: item.comment,
 });
 
 export const productsService = {
