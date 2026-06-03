@@ -95,7 +95,6 @@ async function handleSubmit(event: Event): Promise<void> {
 }
 
 // --- Видалення ---
-
 async function handleDelete(id: string): Promise<void> {
   if (!confirm("Видалити цей продукт?")) return;
 

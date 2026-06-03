@@ -53,7 +53,7 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   res.status(500).json({
     error: {
       code: "INTERNAL_ERROR",
-      message: "Something went wrong",
+      message: "Something went wrong",  // Помилки не розкриваються клієнту для безпеки
     },
   });
 };

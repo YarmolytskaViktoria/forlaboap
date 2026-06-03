@@ -3,6 +3,7 @@ export interface IProduct {
   name: string;
   licenseType: "Free" | "Academic" | "Commercial";
   userEmail: string;
+  ownerUserId: string;
   createdAt: string;
-  comment?: string;
+  comment: string;
 }

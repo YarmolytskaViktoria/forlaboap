@@ -1,7 +1,6 @@
 import type { ProductListItemDto, ApiError } from "./dtos.js";
 
-// --- Notice (повідомлення про успіх/помилку) ---
-
+// --- Повідомлення про успіх/помилку ---
 export function showNotice(text: string, isError = false): void {
   const el = document.getElementById("notice")!;
   el.textContent = text;
@@ -13,7 +12,6 @@ export function showNotice(text: string, isError = false): void {
 }
 
 // --- Стан списку ---
-
 export function renderListStatus(status: "loading" | "empty" | "error" | "success", error?: ApiError): void {
   const el = document.getElementById("listStatus")!;
   if (status === "loading") {
@@ -28,25 +26,57 @@ export function renderListStatus(status: "loading" | "empty" | "error" | "succes
 }
 
 // --- Таблиця продуктів ---
-
 export function renderTable(items: ProductListItemDto[]): void {
   const tbody = document.getElementById("itemsTableBody")!;
   tbody.innerHTML = "";
 
   items.forEach((p, index) => {
     const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${p.name ?? "—"}</td>
-      <td>${p.licenseType ?? "—"}</td>
-      <td>${p.userEmail ?? "—"}</td>
-      <td>${p.createdAt ? new Date(p.createdAt).toLocaleDateString("uk-UA") : "—"}</td>
-      <td>${p.comment ?? "—"}</td>
-      <td>
-        <button class="editBtn" data-id="${p.id}">Редагувати</button>
-        <button class="deleteBtn" data-id="${p.id}">Видалити</button>
-      </td>
-    `;
+
+    const numberTd = document.createElement("td");
+    numberTd.textContent = String(index + 1);
+
+    const nameTd = document.createElement("td");
+    nameTd.textContent = p.name ?? "—";
+
+    const licenseTd = document.createElement("td");
+    licenseTd.textContent = p.licenseType ?? "—";
+
+    const userTd = document.createElement("td");
+    userTd.textContent = p.userEmail ?? "—";
+
+    const dateTd = document.createElement("td");
+    dateTd.textContent = p.createdAt
+      ? new Date(p.createdAt).toLocaleDateString("uk-UA")
+      : "—";
+
+    const commentTd = document.createElement("td");
+    commentTd.textContent = p.comment ?? "—";
+
+    const actionsTd = document.createElement("td");
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "editBtn";
+    editBtn.dataset.id = p.id;
+    editBtn.textContent = "Редагувати";
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "deleteBtn";
+    deleteBtn.dataset.id = p.id;
+    deleteBtn.textContent = "Видалити";
+
+    actionsTd.append(editBtn, deleteBtn);
+
+    row.append(
+      numberTd,
+      nameTd,
+      licenseTd,
+      userTd,
+      dateTd,
+      commentTd,
+      actionsTd
+    );
+
     tbody.appendChild(row);
   });
 }
@@ -96,6 +126,7 @@ export function clearErrors(): void {
   );
 }
 
+// --- Валідація ---
 export function validateForm(data: {
   name: string;
   licenseType: string;
@@ -140,8 +171,7 @@ export function showBackendErrors(errors: Record<string, string[]>): void {
   }
 }
 
-// --- Кнопки ---
-
+// --- Увімкнення/вимкнення кнопок ---
 export function setFormEnabled(isEnabled: boolean): void {
   const btn = document.getElementById("submitBtn") as HTMLButtonElement;
   if (btn) btn.disabled = !isEnabled;

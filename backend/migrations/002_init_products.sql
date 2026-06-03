@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS Products (
   name TEXT NOT NULL,
   licenseType TEXT NOT NULL CHECK (licenseType IN ('Free', 'Academic', 'Commercial')),
   userEmail TEXT NOT NULL,
+  ownerUserId TEXT NOT NULL,
   comment TEXT NOT NULL DEFAULT '',
-  createdAt TEXT NOT NULL
+  createdAt TEXT NOT NULL,
+  FOREIGN KEY (ownerUserId) REFERENCES Users(id) ON DELETE CASCADE
 );

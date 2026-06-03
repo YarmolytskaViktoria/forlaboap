@@ -5,8 +5,9 @@ export interface ProductListItemDto {
   name: string;
   licenseType: string;
   userEmail: string;
+  ownerUserId: string;
   createdAt: string;
-  comment?: string;
+  comment: string;
 }
 
 export interface CreateProductDto {

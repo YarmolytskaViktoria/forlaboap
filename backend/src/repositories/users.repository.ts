@@ -5,23 +5,43 @@ import { all, get, run } from "../db/dbClient.js";
 export const usersRepository = {
   getAll: async (query: ListUsersQuery) => {
     const offset = (query.page - 1) * query.pageSize;
-    const rows = await all<IUser>(`
+
+    const rows = await all<IUser>(
+      `
       SELECT id, name, email, password, createdAt
       FROM Users
       ORDER BY createdAt DESC
-      LIMIT ${query.pageSize} OFFSET ${offset};
-    `);
+      LIMIT ? OFFSET ?;
+      `,
+      [query.pageSize, offset]
+    );
+
     const countRow = await get<{ total: number }>(
       "SELECT COUNT(*) as total FROM Users;"
     );
+
     return { items: rows, total: countRow?.total ?? 0 };
   },
 
   getById: async (id: string): Promise<IUser | undefined> =>
-    get<IUser>(`SELECT id, name, email, password, createdAt FROM Users WHERE id = '${id}';`),
+    get<IUser>(
+      `
+      SELECT id, name, email, password, createdAt
+      FROM Users
+      WHERE id = ?;
+      `,
+      [id]
+    ),
 
   findByEmail: async (email: string): Promise<IUser | undefined> =>
-    get<IUser>(`SELECT id, name, email, password, createdAt FROM Users WHERE email = '${email}';`),
+    get<IUser>(
+      `
+      SELECT id, name, email, password, createdAt
+      FROM Users
+      WHERE email = ?;
+      `,
+      [email]
+    ),
 
   getWithStats: async () => {
     return await all<{
@@ -45,25 +65,37 @@ export const usersRepository = {
   },
 
   create: async (user: IUser): Promise<IUser> => {
-    await run(`
+    await run(
+      `
       INSERT INTO Users (id, name, email, password, createdAt)
-      VALUES ('${user.id}', '${user.name}', '${user.email}', '${user.password}', '${user.createdAt}');
-    `);
+      VALUES (?, ?, ?, ?, ?);
+      `,
+      [user.id, user.name, user.email, user.password, user.createdAt]
+    );
+
     return user;
   },
 
   update: async (id: string, updated: IUser): Promise<IUser | null> => {
-    const result = await run(`
+    const result = await run(
+      `
       UPDATE Users
-      SET name = '${updated.name}', email = '${updated.email}'
-      WHERE id = '${id}';
-    `);
+      SET name = ?, email = ?
+      WHERE id = ?;
+      `,
+      [updated.name, updated.email, id]
+    );
+
     if (result.changes === 0) return null;
     return updated;
   },
 
   delete: async (id: string): Promise<boolean> => {
-    const result = await run(`DELETE FROM Users WHERE id = '${id}';`);
+    const result = await run(
+      `DELETE FROM Users WHERE id = ?;`,
+      [id]
+    );
+
     return result.changes > 0;
   },
 };

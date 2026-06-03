@@ -1,15 +1,18 @@
 import { Router } from "express";
 import { productsController } from "../controllers/products.controller.js";
 import { validate } from "../middleware/validate.middleware.js";
+import { demoAuth } from "../middleware/demo-auth.middleware.js";
 import {
   createProductBodySchema,
+  updateProductBodySchema,
   productIdParamsSchema,
   listProductsQuerySchema,
 } from "../dtos/products.dto.js";
 
 const router = Router();
 
-// Агрегація: кількість продуктів по типу ліцензії
+router.use(demoAuth); // Всі маршрути захищені аутентифікацією
+
 router.get("/stats", productsController.getStats);
 
 router.get("/search", productsController.search);
@@ -36,7 +39,7 @@ router.put(
   "/:id",
   validate({
     params: productIdParamsSchema,
-    body: createProductBodySchema.partial(),
+    body: updateProductBodySchema,
   }),
   productsController.update
 );
